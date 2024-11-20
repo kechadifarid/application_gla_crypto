@@ -69,10 +69,7 @@ public class CryptoApiClient {
         try (Connection connection = DriverManager.getConnection(DB_URL)) {
             connection.setAutoCommit(false); // Désactive l'auto-commit pour contrôler explicitement les transactions
 
-            String deleteQuery = "DELETE FROM cryptocurrencies";
-            try (Statement stmt = connection.createStatement()) {
-                stmt.executeUpdate(deleteQuery);
-            }
+
 
             // Créer la table si elle n'existe pas
             String createTableQuery = "CREATE TABLE IF NOT EXISTS cryptocurrencies (" +
