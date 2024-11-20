@@ -48,6 +48,13 @@
             <version>20210307</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.5.0</version> <!-- Vérifiez si cette version est la plus récente -->
+        </dependency>
+
+
         <!-- Dépendances pour les tests -->
         <!-- JUnit 5 pour les tests unitaires -->
         <dependency>
