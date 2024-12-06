@@ -84,4 +84,29 @@ public class CryptoApiClient {
             System.err.println("Erreur lors de l'insertion dans la base de données : " + e.getMessage());
         }
     }
+
+    public static void FirstTen()
+    {
+        String query = "SELECT date, price_usd, market_cap_usd FROM bitcoin_price_history LIMIT 10";
+
+        // Connexion à la base de données et exécution de la requête
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+             PreparedStatement stmt = connection.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            System.out.println("Connexion à la base de données réussie.");
+
+            // Parcourir les résultats
+            while (rs.next()) {
+                String date = rs.getString("date");
+                double priceUsd = rs.getDouble("price_usd");
+                double marketCapUsd = rs.getDouble("market_cap_usd");
+
+                System.out.println("Date : " + date + ", Prix USD : " + priceUsd + ", Capitalisation : " + marketCapUsd);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la connexion ou de la récupération des données : " + e.getMessage());
+        }
+    }
 }

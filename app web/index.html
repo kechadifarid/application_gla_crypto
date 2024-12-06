@@ -1,87 +1,101 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CryptoTracker - Graphiques</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Inclusion de Chart.js -->
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f9f9f9;
-        }
-        h1 {
-            text-align: center;
-        }
-        .chart-container {
-            width: 80%;
-            margin: 20px auto;
-        }
-        canvas {
-            background-color: #ffffff;
-            border: 1px solid #ddd;
-            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tableau Joli</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 80%;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      background-color: white;
+      border-radius: 10px;
+    }
+
+    th, td {
+      padding: 15px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #4CAF50;
+      color: white;
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    tr:hover {
+      background-color: #ddd;
+    }
+
+    caption {
+      font-size: 1.5em;
+      margin: 10px;
+      color: #333;
+    }
+
+    /* Ajouter un effet au survol de la ligne */
+    td {
+      transition: background-color 0.3s;
+    }
+
+    td:hover {
+      background-color: #ffeb3b;
+    }
+  </style>
 </head>
 <body>
-    <h1>Graphiques des Cryptomonnaies</h1>
-
-    <!-- Conteneur pour le graphique des prix -->
-    <div class="chart-container">
-        <h3>Prix des Cryptomonnaies (USD)</h3>
-        <canvas id="priceChart" width="400" height="200"></canvas>
-    </div>
-
-    <!-- Script pour récupérer les données et afficher le graphique -->
-    <script>
-        // Fonction pour récupérer les données depuis le fichier PHP
-        async function fetchCryptoPrices() {
-            const response = await fetch('fetchPrices.php'); // Appel au script PHP
-            const data = await response.json();             // Parse les données JSON
-            return data;
-        }
-
-        // Fonction pour afficher le graphique des prix
-        async function initPriceChart() {
-            const data = await fetchCryptoPrices();
-
-            // Extraire les noms et prix des données
-            const labels = data.map(item => item.name);         // Noms des cryptos
-            const prices = data.map(item => parseFloat(item.price_usd)); // Prix en USD
-
-            // Configuration du graphique Chart.js
-            const ctx = document.getElementById('priceChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line', // Graphique en courbe
-                data: {
-                    labels: labels, // Noms des cryptos
-                    datasets: [{
-                        label: 'Prix (USD)',
-                        data: prices, // Prix des cryptos
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { position: 'top' }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: false // L'échelle commence au minimum des valeurs
-                        }
-                    }
-                }
-            });
-        }
-
-        // Initialiser le graphique
-        initPriceChart();
-    </script>
+  <table>
+    <caption>Liste des Étudiants</caption>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nom</th>
+        <th>Âge</th>
+        <th>Classe</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>Alice Dupont</td>
+        <td>22</td>
+        <td>Informatique</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Jean Martin</td>
+        <td>20</td>
+        <td>Mathématiques</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>Marie Lefevre</td>
+        <td>21</td>
+        <td>Biologie</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>Lucas Dubois</td>
+        <td>23</td>
+        <td>Physique</td>
+      </tr>
+    </tbody>
+  </table>
 </body>
 </html>

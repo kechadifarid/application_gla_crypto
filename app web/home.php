@@ -34,9 +34,10 @@
 <body>
     <header>
         <div class="logo">
-            <img src="images/logo.png" alt="Logo du site">
-            <div class="site-name">CryptoTracker</div>
+        <img src="images/crypto.png" alt="Logo du site">            <div class="site-name">CryptoTracker</div>
         </div>
+      
     </header>
+
 </body>
 </html>

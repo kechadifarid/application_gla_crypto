@@ -1,17 +1,24 @@
 <?php
-// Connection.php doit contenir les informations de connexion
+// Inclure le fichier de connexion à la base de données
 include('Connection.php');
 
 try {
-    // Requête pour récupérer les noms et prix des cryptomonnaies
-    $stmt = $myPDO->query("SELECT name, price_usd FROM cryptocurrencies LIMIT 10");
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Retourner les données au format JSON
-    header('Content-Type: application/json');
-    echo json_encode($data);
-} catch (Exception $e) {
-    // Retourne un message d'erreur si la requête échoue
-    echo json_encode(['error' => $e->getMessage()]);
+    // Connexion à la base de données via le fichier Connection.php
+    $conn = getConnection(); // Cette fonction doit retourner la connexion PDO
+    
+    // Requête pour récupérer les 10 dernières cryptomonnaies
+    $sql = "SELECT * FROM cryptocurrencies ORDER BY timestamp DESC LIMIT 10";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute();
+    
+    // Récupérer les résultats sous forme de tableau associatif
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Retourner les résultats sous forme de JSON
+    echo json_encode($result);
+}
+catch(PDOException $e) {
+    // Gestion des erreurs
+    echo json_encode(['error' => 'Erreur lors de la récupération des données : ' . $e->getMessage()]);
 }
 ?>
