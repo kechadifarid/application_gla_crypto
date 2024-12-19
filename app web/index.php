@@ -1,7 +1,12 @@
 <?php 
 include('Connection.php'); 
 
-$conn = getConnection();
+// Créer une instance de la classe
+$db = new DatabaseConnection();
+
+// Établir la connexion
+$conn = $db->connect();
+
 
 $stmt = $conn->prepare("SELECT * FROM cryptocurrencies LIMIT 8");
 $stmt->execute();
