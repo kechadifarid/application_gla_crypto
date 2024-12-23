@@ -2,6 +2,9 @@
 require_once ('src/databaseConnection.php');
 require_once ('src/setData.php');
 require_once ('src/setDataAllCrypto.php');
+require_once ('login.php');
+require_once ('register.php');
+require_once ('logout.php');
 
 use App\DatabaseConnection;
 
@@ -38,134 +41,263 @@ $cryptos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CryptoTracker - Tableau</title>
     <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-        }
-        header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 20px;
-            background-color: #1a1a1a;
-            color: white;
-        }
-        .logo {
-            display: flex;
-            align-items: center;
-        }
-        .logo img {
-            height: 40px;
-            margin-right: 10px;
-        }
-        .site-name {
-            font-size: 24px;
-            font-weight: bold;
-        }
-        h1 {
-            text-align: center;
-            margin-top: 20px;
-        }
-        form {
-            width: 80%;
-            margin: 20px auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            background-color: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        form label {
-            font-weight: bold;
-        }
-        form input[type="date"] {
-            padding: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        form button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        form button:hover {
-            background-color: #45a049;
-        }
-        table {
-            border-collapse: collapse;
-            width: 80%;
-            margin: 20px auto;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            background-color: white;
-            border-radius: 10px;
-        }
-        th, td {
-            padding: 15px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
-        th {
-            background-color: #4CAF50;
-            color: white;
-            font-weight: bold;
-        }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        tr:hover {
-            background-color: #ddd;
-        }
-        caption {
-            font-size: 1.5em;
-            margin: 10px;
-            color: #333;
-        }
-        td {
-            transition: background-color 0.3s;
-        }
-        td:hover {
-            background-color: #ffeb3b;
-        }
-        .chart-container {
-            display: none; /* Masquer par défaut */
-            width: 80%;
-            margin: 30px auto;
-        }
+      body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Aligne verticalement tous les éléments dans le header */
+    padding: 15px 30px;
+    background-color: #333;
+    color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.logo {
+    display: flex; /* Permet d'aligner le logo et le texte horizontalement */
+    align-items: center; /* Centre verticalement le texte par rapport au logo */
+}
+
+.logo img {
+    height: 40px;
+    margin-right: 10px; /* Ajoute un espace entre l'image et le texte */
+}
+
+.site-name {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* Formulaire de connexion / inscription */
+form {
+    background-color: white;
+    padding: 20px;
+    margin: 20px auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 500px;
+    box-sizing: border-box;  /* Ajouté pour que le padding ne dépasse pas la largeur définie */
+}
+
+form h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+form label {
+    font-weight: bold;
+    margin-bottom: 8px;
+    display: block;
+    font-size: 16px; /* Améliorer la lisibilité */
+}
+
+form input[type="text"],
+form input[type="password"],
+form input[type="email"],
+form input[type="date"] {
+    width: 100%; /* Maintenir la largeur à 100% de la largeur du formulaire */
+    max-width: 100%; /* S'assurer que la largeur ne dépasse pas celle du formulaire */
+    box-sizing: border-box; /* Cela permet d'inclure le padding dans la largeur totale */
+    padding: 12px;
+    margin: 8px 0 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: all 0.3s ease-in-out;
+}
+
+form input[type="text"]:focus,
+form input[type="password"]:focus,
+form input[type="email"]:focus {
+    border-color: #4CAF50;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+}
+
+form button {
+    width: 100%;
+    padding: 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+form button:hover {
+    background-color: #45a049;
+}
+
+.form-footer {
+    text-align: center;
+    font-size: 16px;
+}
+
+.form-footer a {
+    color: #4CAF50;
+    text-decoration: none;
+}
+
+.form-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Déconnexion */
+#logoutForm button {
+    background-color: #f44336;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#logoutForm button:hover {
+    background-color: #e53935;
+}
+
+/* Table des cryptomonnaies */
+table {
+    width: 80%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+th, td {
+    padding: 15px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+th {
+    background-color: #4CAF50;
+    color: white;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+tr:hover {
+    background-color: #ddd;
+}
+
+/* Animation de transition pour les formulaires */
+.form-container {
+    transition: opacity 0.3s ease;
+}
+
+.form-container.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Ajout de style pour la gestion du graphique */
+#graphContainer {
+    display: none;
+    margin: 20px auto;
+    width: 80%;
+    max-width: 900px;
+    text-align: center;
+}
+
+#cryptoChart {
+    width: 100%;
+    height: 400px;
+    max-width: 800px;
+    margin: 0 auto;
+}
     </style>
 </head>
 <body>
-    <header>
+<header>
         <div class="logo">
             <img src="images/crypto.png" alt="Logo du site">
             <div class="site-name">CryptoTracker</div>
         </div>
+
+        <?php if (isset($_SESSION["user"])): ?>
+            <form id="logoutForm" method="POST">
+                <button type="submit" name="deconnecter">
+                    Déconnexion
+                </button>
+            </form>
+        <?php endif; ?>
     </header>
+
+
+    <?php
+    if (!isset($_SESSION["user"]))
+    {
+    ?>
+
+    <!-- Formulaire de connexion -->
+    <h2>Connexion</h2>
+    <form id="loginForm" method="post">
+        <label for="loginUsername">Nom d'utilisateur :</label>
+        <input type="text" id="loginUsername" name="username" required>
+
+        <label for="loginPassword">Mot de passe :</label>
+        <input type="password" id="loginPassword" name="password" required>
+
+        <button type="submit" name="connecter">Se connecter</button>
+
+        <p><a href="javascript:void(0);" id="showSignupForm">Pas encore inscrit ? Inscrivez-vous ici</a></p>
+    </form>
+
+    <!-- Formulaire d'inscription (initialement masqué) -->
+    <h2 id="signupHeading" style="display: none;">Inscription</h2>
+    <form id="signupForm" method="post" action="register.php" style="display: none;">
+        <label for="username">Nom d'utilisateur :</label>
+        <input type="text" id="username" name="username" required>
+
+        <label for="email">Email :</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="password">Mot de passe :</label>
+        <input type="password" id="password" name="password" required>
+
+        <button type="submit" name="inscrire">S'inscrire</button>
+
+        <p><a href="javascript:void(0);" id="showSignForm">Avez-vous un compte ? Connectez-vous</a></p>
+    </form>
+
+    <?php
+    }
+    ?>
 
     <h1>Tableau des Cryptomonnaies</h1>
 
+   
     <!-- Formulaire de sélection des dates -->
     <div id="dateFormContainer" style="display: none;">
-    <form id="dateForm"  method="get" action="">
-        <label for="start_date">Date de début :</label>
-        <input type="date" id="start_date" name="start_date"?>
+        <form id="dateForm" method="get" action="">
+            <label for="start_date">Date de début :</label>
+            <input type="date" id="start_date" name="start_date"?>
 
-        <label for="end_date">Date de fin :</label>
-        <input type="date" id="end_date" name="end_date" ?>
+            <label for="end_date">Date de fin :</label>
+            <input type="date" id="end_date" name="end_date"?>
 
-        <button type="submit" name="filtrer">Filtrer</button>
-    </form>
-</div>
+            <button type="submit" name="filtrer">Filtrer</button>
+        </form>
+    </div>
 
-
-
+    <?php
+    if(isset($_SESSION["user"]))
+    {
+    ?>
     <!-- Tableau des cryptomonnaies -->
     <table id="cryptoTable">
         <caption>Liste des Cryptomonnaies</caption>
@@ -190,19 +322,20 @@ $cryptos = $stmt->fetchAll(PDO::FETCH_ASSOC);
             ?>
         </tbody>
     </table>
-
+    <?php
+    }
+    ?>
     <div id="graphContainer" class="chart-container">
         <canvas id="cryptoChart"></canvas>
-        <?php
-echo "ccc";
-
-?>
-    </div>
+   </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
        
        document.addEventListener('DOMContentLoaded', function () {
+
+       
+    
     // Variable pour stocker le nom de la cryptomonnaie sélectionnée
     let selectedCryptoName = '';
 
@@ -288,6 +421,27 @@ echo "ccc";
             })
             .catch(error => console.error("Erreur lors de la récupération des données : ", error));
     });
+
+    document.getElementById('showSignupForm').addEventListener('click', function() {
+        // Masquer le formulaire de connexion
+        document.getElementById('loginForm').style.display = 'none';
+
+        // Afficher le formulaire d'inscription
+        document.getElementById('signupForm').style.display = 'block';
+        document.getElementById('signupHeading').style.display = 'block';
+
+    });
+
+    document.getElementById('showSignForm').addEventListener('click', function() {
+        // Masquer le formulaire de connexion
+        document.getElementById('loginForm').style.display = 'block';
+
+        // Afficher le formulaire d'inscription
+        document.getElementById('signupForm').style.display = 'none';
+        document.getElementById('signupHeading').style.display = 'none';
+
+    });
+
 });
 
 
