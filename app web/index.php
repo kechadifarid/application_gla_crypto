@@ -325,6 +325,23 @@ tr:hover {
     <?php
     }
     ?>
+   <?php
+    if(isset($_SESSION["user"]))
+    {
+    ?>
+<form id="alertForm" method="post" action="saveAlert.php">
+<h2>Configurer une alerte</h2>
+    <label for="cryptoName">Nom de la cryptomonnaie :</label>
+    <input type="text" id="cryptoName" name="crypto_name" required>
+
+    <label for="priceThreshold">Seuil de prix (USD) :</label>
+    <input type="number" id="priceThreshold" name="price_threshold" step="0.00000001">
+
+    <button type="submit" name="alerter">Enregistrer l'alerte</button>
+</form>
+<?php
+    }
+    ?>
     <div id="graphContainer" class="chart-container">
         <canvas id="cryptoChart"></canvas>
    </div>
