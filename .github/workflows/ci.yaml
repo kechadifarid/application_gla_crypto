@@ -1,4 +1,4 @@
-name: CI for PHP Project
+name: PHP CI
 
 on:
   push:
@@ -13,34 +13,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Étape 1 : Cloner le dépôt
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      # Étape 2 : Installer PHP 8.2
-      - name: Set up PHP 8.2
+      - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
-          extensions: mbstring, xml, bcmath  # Ajoutez les extensions nécessaires
+          php-version: '8.1'
 
-      # Étape 3 : Installer les dépendances Composer
       - name: Install dependencies
         run: |
-          composer install --no-interaction
+          composer install
 
-      # Étape 4 : Ajouter les permissions d'exécution pour PHPUnit
-      - name: Set executable permissions for PHPUnit
-        run: chmod +x vendor/bin/phpunit
-
-      # Étape 5 : Exécuter PHPUnit avec génération de couverture
-      - name: Run PHPUnit tests with coverage
+      - name: Run PHPUnit tests and generate coverage report
         run: |
-          vendor/bin/phpunit --coverage-xml=coverage-report.xml
+          vendor/bin/phpunit --coverage-clover=coverage.xml
 
-      # Étape 6 : Télécharger le rapport de couverture sur Codecov
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}  # Utilisation du secret CODECOV_TOKEN
-          file: coverage-report.xml  # Fichier de couverture généré par PHPUnit
+          file: coverage.xml
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
