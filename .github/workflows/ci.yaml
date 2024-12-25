@@ -24,12 +24,21 @@ jobs:
           php-version: '8.2'
           extensions: mbstring, xml, bcmath  # Ajoutez les extensions nécessaires
 
-      # Étape 4 : Exécuter PHPUnit avec génération de couverture
+      # Étape 3 : Installer les dépendances Composer
+      - name: Install dependencies
+        run: |
+          composer install --no-interaction
+
+      # Étape 4 : Ajouter les permissions d'exécution pour PHPUnit
+      - name: Set executable permissions for PHPUnit
+        run: chmod +x vendor/bin/phpunit
+
+      # Étape 5 : Exécuter PHPUnit avec génération de couverture
       - name: Run PHPUnit tests with coverage
         run: |
           vendor/bin/phpunit --coverage-xml=coverage-report.xml
 
-      # Étape 5 : Télécharger le rapport de couverture sur Codecov
+      # Étape 6 : Télécharger le rapport de couverture sur Codecov
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
