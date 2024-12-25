@@ -17,19 +17,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Étape 2 : Installer PHP et les dépendances
-      - name: Set up PHP
+      # Étape 2 : Installer PHP 8.2
+      - name: Set up PHP 8.2
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.1'  # Utilisez la version PHP que vous utilisez
-          extensions: mbstring, xml, bcmath  # Ajoutez les extensions PHP nécessaires
+          php-version: '8.2'
+          extensions: mbstring, xml, bcmath  # Ajoutez les extensions nécessaires
 
-      # Étape 3 : Installer les dépendances Composer
+      # Étape 3 : Installer les dépendances via Composer
       - name: Install dependencies
         run: |
           composer install --no-interaction
 
-      # Étape 4 : Exécuter PHPUnit avec génération du rapport de couverture
+      # Étape 4 : Exécuter PHPUnit avec génération de couverture
       - name: Run PHPUnit tests with coverage
         run: |
           vendor/bin/phpunit --coverage-xml=coverage-report.xml
@@ -38,5 +38,5 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}  # Utilisez le secret CODECOV_TOKEN pour l'authentification
-          file: coverage-report.xml  # Fichier de couverture généré
+          token: ${{ secrets.CODECOV_TOKEN }}  # Utilisation du secret CODECOV_TOKEN
+          file: coverage-report.xml  # Fichier de couverture généré par PHPUnit
