@@ -3,7 +3,7 @@
         'name' => 'kecha/app-web',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '226f41f3c6bef96538eead566e911b1671adb560',
+        'reference' => '10259cb0c465fbe5149cfdc7eff3ed61588a88ad',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'kecha/app-web' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '226f41f3c6bef96538eead566e911b1671adb560',
+            'reference' => '10259cb0c465fbe5149cfdc7eff3ed61588a88ad',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
