@@ -1,5 +1,5 @@
 <?php
-
+namespace App;
 require_once ('databaseConnection.php');
 use App\DatabaseConnection;
 class SetDataAllCrypto {
@@ -21,6 +21,7 @@ public function truncateTable($crypto)
     
         // Exécution de la requête
         $this->conn->exec($sql_mod);
+        return "Table '$tableName' videe.";
 
 }
 
@@ -38,7 +39,7 @@ public function getDataCrypto($date_debut,$date_fin,$crypto) {
      // Récupérer les données depuis l'API
      $response = file_get_contents($api_url);
      if ($response === FALSE) {
-         die("Erreur lors de la récupération des données de l'API pour $crypto");
+         return "Erreur lors de la récupération des données de l'API pour $crypto" ;
      }
  
      // Décodage du JSON en tableau PHP
