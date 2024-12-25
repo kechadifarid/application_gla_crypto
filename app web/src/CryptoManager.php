@@ -1,6 +1,7 @@
 <?php
 namespace App;
-include('databaseConnection.php');
+require_once ('databaseConnection.php');
+
 
 class CryptoManager {
     private $conn;
@@ -13,13 +14,8 @@ class CryptoManager {
 
     // Méthode pour récupérer les données de l'API
     public function fetchCryptoDataFromAPI($api_url) {
-        return $this->fetchData($api_url);  // Utilise la méthode interne fetchData
-    }
+        $response = file_get_contents($api_url);
 
-    // Méthode pour récupérer les données de l'API via file_get_contents (à mocker dans les tests)
-    protected function fetchData($url) {
-        $response = file_get_contents($url);
-        
         if ($response === FALSE) {
             throw new Exception("Erreur lors de la récupération des données de l'API");
         }
@@ -30,27 +26,43 @@ class CryptoManager {
             throw new Exception("Erreur de décodage JSON");
         }
 
+       
         return $data['data'];
     }
 
     // Méthode pour créer la table si elle n'existe pas
     public function createCryptoTable() {
-        $sql = "
-        CREATE TABLE IF NOT EXISTS cryptocurrencies (
-            id SERIAL PRIMARY KEY,
-            name VARCHAR(100),
-            symbol VARCHAR(10) UNIQUE,
-            price_usd NUMERIC,
-            rank INT
-        );
-        ";
+      
+            $sql = "
+            CREATE TABLE IF NOT EXISTS cryptocurrencies (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(100),
+                symbol VARCHAR(10) UNIQUE,
+                price_usd NUMERIC,
+                rank INT
+            );
+            ";
+    
+            $this->conn->exec($sql);
+    
+            return "Table 'cryptocurrencies' creee ou existante.";
+        }
+    // Méthode pour vider la table 'cryptocurrencies'
+public function clearCryptoTable() {
+    $sql = "TRUNCATE TABLE cryptocurrencies RESTART IDENTITY;";
 
+    try {
         $this->conn->exec($sql);
-        echo "La table 'cryptocurrencies' a été créée (ou existe déjà).<br>";
+        
+    } catch (Exception $e) {
+       
     }
+}
+
 
     // Méthode pour insérer ou mettre à jour les données
     public function insertOrUpdateCryptos($cryptos) {
+        
         $stmt = $this->conn->prepare("
             INSERT INTO cryptocurrencies (name, symbol, price_usd, rank) 
             VALUES (:name, :symbol, :price_usd, :rank)
@@ -66,7 +78,7 @@ class CryptoManager {
             $stmt->execute();
         }
 
-        echo "Données insérées ou mises à jour avec succès!<br>";
+       
     }
 }
 ?>
