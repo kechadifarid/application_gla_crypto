@@ -24,11 +24,6 @@ jobs:
           php-version: '8.2'
           extensions: mbstring, xml, bcmath  # Ajoutez les extensions nécessaires
 
-      # Étape 3 : Installer les dépendances via Composer
-      - name: Install dependencies
-        run: |
-          composer install --no-interaction
-
       # Étape 4 : Exécuter PHPUnit avec génération de couverture
       - name: Run PHPUnit tests with coverage
         run: |
