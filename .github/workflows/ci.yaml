@@ -1,4 +1,4 @@
-name: PHP CI
+name: CI/CD Pipeline
 
 on:
   push:
@@ -9,29 +9,46 @@ on:
       - main
 
 jobs:
-  phpunit:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    # 1. Checkout le code
+    - name: Checkout Code
+      uses: actions/checkout@v3
 
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.1'
+    # 2. Installer PHP
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1' # Version PHP à utiliser
+        extensions: mbstring, intl, pdo, mysql
+        coverage: xdebug
+        ini-values: post_max_size=256M, upload_max_filesize=256M
+        tools: composer
 
-      - name: Install dependencies
-        run: |
-          composer install
+    # 3. Installer les dépendances avec Composer
+    - name: Install Dependencies
+      run: composer install --no-progress --no-suggest --prefer-dist
 
-      - name: Run PHPUnit tests and generate coverage report
-        run: |
-          vendor/bin/phpunit --coverage-clover=coverage.xml
+    # 4. Lancer les tests (exemple avec PHPUnit)
+    - name: Run Tests
+      run: vendor/bin/phpunit
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          file: coverage.xml
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Deploy to Server
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SERVER_HOST: ${{ secrets.SERVER_HOST }}
+        SERVER_USER: ${{ secrets.SERVER_USER }}
+      run: |
+        echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+        ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "cd /path/to/project && git pull && composer install && php artisan migrate"

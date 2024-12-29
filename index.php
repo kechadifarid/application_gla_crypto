@@ -1,19 +1,20 @@
 <?php 
 require_once ('src/databaseConnection.php');
 require_once ('src/setData.php');
-require_once ('src/setDataAllCrypto.php');
 require_once ('login.php');
 require_once ('register.php');
 require_once ('logout.php');
 
 use App\DatabaseConnection;
+use App\CryptoManager;
+
 
 // Créer une instance de la classe
 $db = new DatabaseConnection();
 $conn = $db->connect();
 
 $setData = new CryptoManager();
-$setDataAll = new SetDataAllCrypto();
+
 
 // 1. Vider la table 'cryptocurrencies' avant d'insérer les nouvelles données
 $setData->clearCryptoTable();
@@ -41,31 +42,34 @@ $cryptos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CryptoTracker - Tableau</title>
     <style>
-      body {
+body {
     margin: 0;
     font-family: 'Arial', sans-serif;
     background-color: #f5f5f5;
     color: #333;
 }
 
+/* Header */
 header {
     display: flex;
     justify-content: space-between;
-    align-items: center; /* Aligne verticalement tous les éléments dans le header */
-    padding: 15px 30px;
+    align-items: center;
+    padding: 10px 20px;
     background-color: #333;
     color: white;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 100%;
 }
 
+/* Logo et nom du site */
 .logo {
-    display: flex; /* Permet d'aligner le logo et le texte horizontalement */
-    align-items: center; /* Centre verticalement le texte par rapport au logo */
+    display: flex;
+    align-items: center;
 }
 
 .logo img {
     height: 40px;
-    margin-right: 10px; /* Ajoute un espace entre l'image et le texte */
+    margin-right: 10px;
 }
 
 .site-name {
@@ -150,20 +154,33 @@ form button:hover {
 }
 
 /* Déconnexion */
+#logoutForm {
+    margin: 0; /* Supprime toute marge autour du formulaire */
+    padding: 0; /* Supprime tout remplissage */
+    display: flex; /* Alignement plus naturel */
+    align-items: center; /* Centrage vertical du bouton */
+    justify-content: flex-end; /* Alignement à droite */
+    background: none; /* Supprime tout arrière-plan du formulaire */
+    border: none; /* Supprime les bordures éventuelles */
+}
+
 #logoutForm button {
-    background-color: #f44336;
     padding: 10px 20px;
     font-size: 16px;
+    font-weight: bold;
+    background: linear-gradient(90deg, #ff4b2b, #ff416c);
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 25px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background 0.3s ease, transform 0.2s ease;
 }
 
 #logoutForm button:hover {
-    background-color: #e53935;
+    background: linear-gradient(90deg, #ff416c, #ff4b2b);
+    transform: scale(1.05);
 }
+
 
 /* Table des cryptomonnaies */
 table {
@@ -219,12 +236,38 @@ tr:hover {
     max-width: 800px;
     margin: 0 auto;
 }
+.menu-bar {
+    display: flex;
+    justify-content: center;
+    background-color: #444;
+    padding: 10px;
+}
+
+.menu-bar a {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px;
+    font-size: 18px;
+    transition: color 0.3s ease;
+}
+
+.menu-bar a:hover {
+    color: #6a1b9a;
+}
+      
     </style>
 </head>
 <body>
+
+<div class="menu-bar">
+    <a href="index.php">Accueil</a>
+    <a href="javascript:void(0);" id="alertes">Alertes</a>
+</div>
 <header>
         <div class="logo">
-            <img src="images/crypto.png" alt="Logo du site">
+        <a href="index.php">
+  <img src="images/crypto.png" alt="Logo du site">
+</a>
             <div class="site-name">CryptoTracker</div>
         </div>
 
@@ -244,8 +287,9 @@ tr:hover {
     ?>
 
     <!-- Formulaire de connexion -->
-    <h2>Connexion</h2>
+    
     <form id="loginForm" method="post">
+    <h1>Connexion</h1>
         <label for="loginUsername">Nom d'utilisateur :</label>
         <input type="text" id="loginUsername" name="username" required>
 
@@ -258,8 +302,9 @@ tr:hover {
     </form>
 
     <!-- Formulaire d'inscription (initialement masqué) -->
-    <h2 id="signupHeading" style="display: none;">Inscription</h2>
+    
     <form id="signupForm" method="post" action="register.php" style="display: none;">
+    <h2 id="signupHeading" style="display: none;">Inscription</h2>
         <label for="username">Nom d'utilisateur :</label>
         <input type="text" id="username" name="username" required>
 
@@ -278,11 +323,12 @@ tr:hover {
     }
     ?>
 
-    <h1>Tableau des Cryptomonnaies</h1>
+    
 
    
     <!-- Formulaire de sélection des dates -->
     <div id="dateFormContainer" style="display: none;">
+    <h1>Tableau des Cryptomonnaies</h1>
         <form id="dateForm" method="get" action="">
             <label for="start_date">Date de début :</label>
             <input type="date" id="start_date" name="start_date"?>
@@ -329,7 +375,7 @@ tr:hover {
     if(isset($_SESSION["user"]))
     {
     ?>
-<form id="alertForm" method="post" action="saveAlert.php">
+<form id="alertForm" method="post" action="saveAlert.php" style="display: none;">
 <h2>Configurer une alerte</h2>
     <label for="cryptoName">Nom de la cryptomonnaie :</label>
     <input type="text" id="cryptoName" name="crypto_name" required>
@@ -351,11 +397,22 @@ tr:hover {
        
        document.addEventListener('DOMContentLoaded', function () {
 
+        document.getElementById('alertes').addEventListener('click', function () {
+        
+
+        // Afficher uniquement le formulaire des alertes
+        document.getElementById('alertForm').style.display = 'block';
+        document.getElementById('cryptoTable').style.display = 'none';
+            document.getElementById('graphContainer').style.display = 'none';
+            document.getElementById('dateFormContainer').style.display = 'none';
+    });
+
        
     
     // Variable pour stocker le nom de la cryptomonnaie sélectionnée
     let selectedCryptoName = '';
 
+    
     // Assurez-vous que chaque lien fonctionne correctement
     document.querySelectorAll('.showGraph').forEach(function (link) {
         link.addEventListener('click', function (event) {
@@ -450,6 +507,7 @@ tr:hover {
     });
 
     document.getElementById('showSignForm').addEventListener('click', function() {
+        console.log("Alertes cliqué");
         // Masquer le formulaire de connexion
         document.getElementById('loginForm').style.display = 'block';
 
@@ -458,6 +516,8 @@ tr:hover {
         document.getElementById('signupHeading').style.display = 'none';
 
     });
+  
+    
 
 });
 
