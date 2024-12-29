@@ -11,6 +11,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 
 
 class SetDataTest extends TestCase {
+    
     private $db;
 
     protected function setUp(): void {
