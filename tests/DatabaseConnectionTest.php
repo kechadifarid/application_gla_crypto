@@ -5,6 +5,7 @@ use PHPUnit\Framework\TestCase;
 use App\DatabaseConnection;  // Assurez-vous que ce 'use' est correct
 
 class DatabaseConnectionTest extends TestCase {
+    
     private $db;
 
     protected function setUp(): void {
