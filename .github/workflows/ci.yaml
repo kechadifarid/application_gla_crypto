@@ -64,6 +64,9 @@ jobs:
     # 8. Récupération du code pour déploiement
     - name: Checkout Code
       uses: actions/checkout@v3
+    
+    - name: Start SSH Agent
+      run: eval $(ssh-agent -s)
 
     # 9. Ajouter la clé SSH
     - name: Add SSH Private Key
