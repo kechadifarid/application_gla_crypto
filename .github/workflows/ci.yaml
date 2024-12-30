@@ -65,12 +65,31 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    # 9. Déploiement sur le serveur
+    # 9. Ajouter la clé SSH
+    - name: Add SSH Private Key
+      env:
+        SSH_PRIVATE_KEY_B64: ${{ secrets.SSH_PRIVATE_KEY_B64 }}
+      run: |
+        echo "$SSH_PRIVATE_KEY_B64" | base64 -d > id_rsa
+        chmod 600 id_rsa
+        ssh-add id_rsa
+
+    # 10. Tester la connexion SSH
+    - name: Test SSH Connection
+      env:
+        SERVER_HOST: ${{ secrets.SERVER_HOST }}
+        SERVER_USER: ${{ secrets.SERVER_USER }}
+      run: ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "echo 'SSH connection successful'"
+
+    # 11. Déployer sur le serveur
     - name: Deploy to Server
       env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         SERVER_HOST: ${{ secrets.SERVER_HOST }}
         SERVER_USER: ${{ secrets.SERVER_USER }}
       run: |
-        echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-        ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "cd /path/to/project && git pull && composer install && php artisan migrate"
+        ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "
+          cd /home/nas-wks01/users/uapv2200995/Donnees_itinerantes_depuis_serveur_pedagogique/public_html/application_gla_crypto &&
+          git pull &&
+          composer install &&
+          php artisan migrate
+        "
