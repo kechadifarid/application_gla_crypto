@@ -5,6 +5,7 @@ use PDO;
 use PDOException;
 
 class DatabaseConnection {
+    
     private $servername = "pedago01c.univ-avignon.fr";
     private $username = "uapv2200995";
     private $password = "xm4Quj";
