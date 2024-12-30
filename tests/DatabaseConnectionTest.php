@@ -2,7 +2,7 @@
 namespace Test;
 
 use PHPUnit\Framework\TestCase;
-use App\DatabaseConnection;  // Assurez-vous que ce 'use' est correct
+use App\DatabaseConnection; 
 
 class DatabaseConnectionTest extends TestCase {
     
