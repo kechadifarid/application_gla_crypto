@@ -1,63 +1,24 @@
-name: CI/CD Pipeline
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Checkout le code
-    - name: Checkout Code
-      uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-    # 2. Installer PHP
-    - name: Set up PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.1'
-        extensions: mbstring, intl, pdo, mysql
-        tools: composer
+      - name: Verify PHP Version
+        run: php --version
 
-    # 3. Nettoyer les dépendances et le cache Composer
-    - name: Remove existing dependencies
-      run: |
-        rm -rf vendor composer.lock
-    - name: Clear Composer Cache
-      run: composer clear-cache
+      - name: List Files in src and tests
+        run: |
+          ls -la src/
+          ls -la tests/
 
-    # 4. Installer les dépendances avec Composer
-    - name: Install Dependencies
-      run: composer install --no-progress --prefer-dist
+      - name: Dump Autoload
+        run: composer dump-autoload -o
 
-    # 5. Vérifier et installer PHPUnit si nécessaire
-    - name: Require PHPUnit
-      run: composer require --dev phpunit/phpunit:^9.5 --no-progress --prefer-dist
+      - name: Show PSR-4 Autoload Map
+        run: cat vendor/composer/autoload_psr4.php
 
-    # 6. Lancer les tests
-    - name: Run Tests
-      run: vendor/bin/phpunit
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-
-    steps:
-    - name: Checkout Code
-      uses: actions/checkout@v3
-
-    - name: Deploy to Server
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        SERVER_HOST: ${{ secrets.SERVER_HOST }}
-        SERVER_USER: ${{ secrets.SERVER_USER }}
-      run: |
-        echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-        ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "cd /path/to/project && git pull && composer install && php artisan migrate"
+      - name: Run Tests
+        run: vendor/bin/phpunit --filter DatabaseConnectionTest
