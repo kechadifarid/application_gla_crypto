@@ -28,7 +28,7 @@ public function testTruncateTable() {
             $result = $setDataAllCryptoMock->getDataCrypto('2020-01-01', '2020-12-31', 'testCrypto');
     
             
-            $this->assertEquals("Erreur lors de la récupération des données de l'API pour testCrypto", $result);
+            $this->assertSame('Erreur lors de la récupération des données de l\'API pour testCrypto', $result);
         }
     }
 

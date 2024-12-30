@@ -67,7 +67,8 @@ class SetDataTest extends TestCase {
 
         $result = $cryptoManager->createCryptoTable();
 
-        $this->assertEquals("Table 'cryptocurrencies' creee ou existante.", $result);
+        $this->assertSame("La table 'cryptocurrencies' a été créée (ou existe déjà).<br>", $result);
+
     }
     public function testClearCryptoTable() {
         $cryptoManager = new CryptoManager();

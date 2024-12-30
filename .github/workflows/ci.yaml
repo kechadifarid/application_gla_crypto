@@ -21,17 +21,26 @@ jobs:
     - name: Set up PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '8.1' # Version PHP à utiliser
+        php-version: '8.1'
         extensions: mbstring, intl, pdo, mysql
-        coverage: xdebug
-        ini-values: post_max_size=256M, upload_max_filesize=256M
         tools: composer
 
-    # 3. Installer les dépendances avec Composer
-    - name: Install Dependencies
-      run: composer install --no-progress --no-suggest --prefer-dist
+    # 3. Nettoyer les dépendances et le cache Composer
+    - name: Remove existing dependencies
+      run: |
+        rm -rf vendor composer.lock
+    - name: Clear Composer Cache
+      run: composer clear-cache
 
-    # 4. Lancer les tests (exemple avec PHPUnit)
+    # 4. Installer les dépendances avec Composer
+    - name: Install Dependencies
+      run: composer install --no-progress --prefer-dist
+
+    # 5. Vérifier et installer PHPUnit si nécessaire
+    - name: Require PHPUnit
+      run: composer require --dev phpunit/phpunit:^9.5 --no-progress --prefer-dist
+
+    # 6. Lancer les tests
     - name: Run Tests
       run: vendor/bin/phpunit
 

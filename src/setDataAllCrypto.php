@@ -21,6 +21,7 @@ public function truncateTable($crypto)
     
         // Exécution de la requête
         $this->conn->exec($sql_mod);
+        return "Table 'infobitcoin' videe.";
 
 }
 

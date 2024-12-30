@@ -1,7 +1,7 @@
 <?php
 namespace App;
 require_once ('databaseConnection.php');
-
+use App\DatabaseConnection;
 
 class CryptoManager {
     private $conn;
@@ -32,24 +32,23 @@ class CryptoManager {
 
     // Méthode pour créer la table si elle n'existe pas
     public function createCryptoTable() {
-      
-            $sql = "
-            CREATE TABLE IF NOT EXISTS cryptocurrencies (
-                id SERIAL PRIMARY KEY,
-                name VARCHAR(100),
-                symbol VARCHAR(10) UNIQUE,
-                price_usd NUMERIC,
-                rank INT
-            );
-            ";
-    
-            $this->conn->exec($sql);
-    
-            return "Table 'cryptocurrencies' creee ou existante.";
-        }
+        $sql = "
+        CREATE TABLE IF NOT EXISTS cryptocurrencies (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(100),
+            symbol VARCHAR(10) UNIQUE,
+            price_usd NUMERIC,
+            rank INT
+        );
+        ";
+
+        $this->conn->exec($sql);
+        return "La table 'cryptocurrencies' a été créée (ou existe déjà).<br>";
+    }
+
     // Méthode pour vider la table 'cryptocurrencies'
 public function clearCryptoTable() {
-    $sql = "TRUNCATE TABLE cryptocurrencies RESTART IDENTITY;";
+    $sql = "TRUNCATE TABLE cryptocurrencies RESTART IDENTITY;";  // RESTART IDENTITY réinitialise les identifiants (id) à 1
 
     try {
         $this->conn->exec($sql);
