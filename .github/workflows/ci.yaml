@@ -56,35 +56,34 @@ jobs:
       run: vendor/bin/phpunit --filter DatabaseConnectionTest
 
   deploy:
-    needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
 
     steps:
-    # 8. Récupération du code pour déploiement
+    # 1. Récupération du code
     - name: Checkout Code
       uses: actions/checkout@v3
     
+    # 2. Démarrer l'agent SSH
     - name: Start SSH Agent
       run: eval $(ssh-agent -s)
 
-    # 9. Ajouter la clé SSH
+    # 3. Ajouter la clé privée
     - name: Add SSH Private Key
       env:
-        SSH_PRIVATE_KEY_B64: ${{ secrets.SSH_PRIVATE_KEY}}
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       run: |
         echo "$SSH_PRIVATE_KEY" | base64 -d > id_rsa
         chmod 600 id_rsa
         ssh-add id_rsa
 
-    # 10. Tester la connexion SSH
+    # 4. Tester la connexion SSH
     - name: Test SSH Connection
       env:
         SERVER_HOST: ${{ secrets.SERVER_HOST }}
         SERVER_USER: ${{ secrets.SERVER_USER }}
       run: ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "echo 'SSH connection successful'"
 
-    # 11. Déployer sur le serveur
+    # 5. Déployer le code
     - name: Deploy to Server
       env:
         SERVER_HOST: ${{ secrets.SERVER_HOST }}
