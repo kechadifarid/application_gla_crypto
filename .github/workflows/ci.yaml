@@ -12,6 +12,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      DB_HOST: pedago01c.univ-avignon.fr
+      DB_USERNAME: uapv2200995
+      DB_PASSWORD: xm4Quj
+      DB_NAME: etd
+      DB_PORT: 5432
+
     steps:
     # Étape 1 : Récupérer le code source
     - name: Checkout Code
@@ -50,6 +57,11 @@ jobs:
 
     # Étape 6 : Exécuter les tests PHPUnit avec couverture
     - name: Run PHPUnit Tests
+      env:
+        DB_HOST: ${{ env.DB_HOST }}
+        DB_USERNAME: ${{ env.DB_USERNAME }}
+        DB_PASSWORD: ${{ env.DB_PASSWORD }}
+        DB_NAME: ${{ env.DB_NAME }}
       run: vendor/bin/phpunit --coverage-clover=coverage.xml
 
     # Étape 7 : Analyser avec SonarQube
