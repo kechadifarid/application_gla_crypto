@@ -28,8 +28,8 @@ jobs:
     # Étape 3 : Installer Xdebug
     - name: Install Xdebug
       run: |
-        sudo pecl install xdebug
-        echo "zend_extension=$(php-config --extension-dir)/xdebug.so" | sudo tee /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+        sudo apt-get update
+        sudo apt-get install -y php-xdebug
 
     # Étape 4 : Configurer Xdebug
     - name: Configure Xdebug
