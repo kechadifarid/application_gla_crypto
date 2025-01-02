@@ -12,13 +12,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    env:
-      DB_HOST: pedago01c.univ-avignon.fr
-      DB_USERNAME: uapv2200995
-      DB_PASSWORD: xm4Quj
-      DB_NAME: etd
-      DB_PORT: 5432
-
     steps:
     # Étape 1 : Récupérer le code source
     - name: Checkout Code
@@ -32,23 +25,45 @@ jobs:
         extensions: mbstring, intl, pdo, pgsql
         tools: composer
 
+    # Étape 3 : Installer Xdebug
+    - name: Install Xdebug
+      run: |
+        sudo pecl install xdebug
+        echo "zend_extension=$(php-config --extension-dir)/xdebug.so" | sudo tee /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+
     # Étape 4 : Configurer Xdebug
     - name: Configure Xdebug
       run: |
-        mkdir -p ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d
-        echo "xdebug.mode=coverage" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini
-        echo "xdebug.start_with_request=no" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini
+        echo "xdebug.mode=coverage" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+        echo "xdebug.start_with_request=no" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
-    # Étape 5 : Exécuter les tests PHPUnit avec couverture
+    # Étape 5 : Vérifier la version de PHP
+    - name: Verify PHP Version
+      run: php --version
+
+    # Étape 6 : Vérifier les fichiers du projet
+    - name: List Files in src and tests
+      run: |
+        echo "Files in src:"
+        ls -la src/
+        echo "Files in tests:"
+        ls -la tests/
+
+    # Étape 7 : Nettoyer et réinstaller les dépendances
+    - name: Remove Dependencies and Cache
+      run: |
+        rm -rf vendor composer.lock
+        composer clear-cache
+    - name: Install Dependencies
+      run: composer install --no-progress --prefer-dist
+    - name: Dump Autoload
+      run: composer dump-autoload -o
+
+    # Étape 8 : Exécuter les tests PHPUnit avec couverture
     - name: Run PHPUnit Tests
-      env:
-        DB_HOST: ${{ env.DB_HOST }}
-        DB_USERNAME: ${{ env.DB_USERNAME }}
-        DB_PASSWORD: ${{ env.DB_PASSWORD }}
-        DB_NAME: ${{ env.DB_NAME }}
       run: vendor/bin/phpunit --coverage-clover=coverage.xml
 
-    # Étape 6 : Analyser avec SonarQube
+    # Étape 9 : Analyser avec SonarQube
     - name: SonarQube Analysis
       env:
         SONAR_HOST_URL: http://<IP_SONARQUBE>:9000
@@ -58,3 +73,19 @@ jobs:
           -Dsonar.projectKey=my-php-project \
           -Dsonar.php.coverage.reportPaths=coverage.xml \
           -Dsonar.sources=src
+    
+     # Étape 9 : Installer et configurer Snyk
+    - name: Install Snyk
+      run: npm install -g snyk
+    - name: Authenticate Snyk
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      run: snyk auth $SNYK_TOKEN
+
+    # Étape 10 : Lancer l'analyse des dépendances avec Snyk
+    - name: Snyk Dependency Test
+      run: snyk test --all-projects
+
+    # Étape 11 : Surveiller les dépendances avec Snyk
+    - name: Monitor Dependencies with Snyk
+      run: snyk monitor
