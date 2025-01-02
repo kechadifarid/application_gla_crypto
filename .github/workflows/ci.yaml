@@ -13,23 +13,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Récupération du code
+    # Étape 1 : Récupérer le code source
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    # 2. Configuration de PHP
+    # Étape 2 : Configurer PHP
     - name: Set up PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '8.4'
+        php-version: '8.1'  # Ajusté pour correspondre à une version stable
         extensions: mbstring, intl, pdo, pgsql
         tools: composer
 
-    # 3. Vérifier la version de PHP
+    # Étape 3 : Vérifier la version de PHP
     - name: Verify PHP Version
       run: php --version
 
-    # 4. Lister les fichiers pour diagnostic
+    # Étape 4 : Diagnostiquer les fichiers du projet
     - name: List Files in src and tests
       run: |
         echo "Files in src:"
@@ -37,7 +37,7 @@ jobs:
         echo "Files in tests:"
         ls -la tests/
 
-    # 5. Nettoyer le cache Composer et regénérer l'autoloader
+    # Étape 5 : Nettoyer et réinstaller les dépendances
     - name: Remove Dependencies and Cache
       run: |
         rm -rf vendor composer.lock
@@ -47,28 +47,26 @@ jobs:
     - name: Dump Autoload
       run: composer dump-autoload -o
 
-    # 6. Afficher la configuration PSR-4 pour vérifier l'autoload
+    # Étape 6 : Vérifier la configuration PSR-4
     - name: Show PSR-4 Autoload Map
       run: cat vendor/composer/autoload_psr4.php
 
-    # 7. Lancer les tests PHPUnit
+    # Étape 7 : Exécuter les tests PHPUnit
     - name: Run PHPUnit Tests
-      run: vendor/bin/phpunit --filter DatabaseConnectionTest
+      run: vendor/bin/phpunit --coverage-clover=coverage.xml
 
-    # 8. Installer Snyk
+    # Étape 8 : Installer et configurer Snyk
     - name: Install Snyk
       run: npm install -g snyk
-
-    # 9. Authentifier Snyk
     - name: Authenticate Snyk
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       run: snyk auth $SNYK_TOKEN
 
-    # 10. Lancer l'analyse des dépendances
+    # Étape 9 : Lancer l'analyse des dépendances
     - name: Snyk Dependency Test
       run: snyk test --all-projects
 
-    # 11. Lancer la surveillance des dépendances
+    # Étape 10 : Surveiller les dépendances avec Snyk
     - name: Monitor Dependencies with Snyk
       run: snyk monitor

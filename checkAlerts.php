@@ -13,7 +13,7 @@ $conn = $db->connect();
 $query = "SELECT alerts.*, users.email FROM alerts 
           JOIN users ON alerts.user_id = users.id 
           WHERE email_sent = FALSE";
-          
+
 $stmt = $conn->prepare($query);
 $stmt->execute();
 $alerts = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -68,17 +68,17 @@ function sendEmail($email, $crypto, $price) {
     $mail->isSMTP();
     $mail->Host = 'smtp.gmail.com';
     $mail->Port = 587;
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Paramétrer le Mailer pour utiliser SMTP 
-    $mail->SMTPAuth = true; // Activer authentication SMTP
-    $mail->Username = 'kechadifarid10@gmail.com'; // Votre adresse email d'envoi
-    $mail->Password = 'ttyngeouzlojtgac'; // Le mot de passe de cette adresse email
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; 
+    $mail->SMTPAuth = true;
+    $mail->Username = 'kechadifarid10@gmail.com'; 
+    $mail->Password = 'ttyngeouzlojtgac';
     
     
-    $mail->setFrom('kechadifarid10@gmail.com', 'Mailer'); // Personnaliser l'envoyeur
-    $mail->addAddress($email, 'kechadi farid'); // Ajouter le destinataire
-    $mail->addReplyTo($email, 'Information'); // L'adresse de réponse
+    $mail->setFrom('kechadifarid10@gmail.com', 'Mailer');
+    $mail->addAddress($email, 'kechadi farid'); 
+    $mail->addReplyTo($email, 'Information'); 
     
-    $mail->isHTML(true); // Paramétrer le format des emails en HTML ou non
+    $mail->isHTML(true);
     
     $mail->Subject = 'Alerte personnalisée';
     $mail->Body = "La crypto-monnaie $crypto a dépassé le seuil de $price USD.";
