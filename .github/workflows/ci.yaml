@@ -30,12 +30,12 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y php-xdebug
 
+    # Étape 3 : Configurer Xdebug
     - name: Configure Xdebug
       run: |
-        echo "zend_extension=$(php-config --extension-dir)/xdebug.so" | sudo tee /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-        echo "xdebug.mode=coverage" | sudo tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-        echo "xdebug.start_with_request=no" | sudo tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-
+        mkdir -p ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d
+        echo "xdebug.mode=coverage" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini
+        echo "xdebug.start_with_request=no" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini
 
     # Étape 5 : Vérifier la version de PHP
     - name: Verify PHP Version
