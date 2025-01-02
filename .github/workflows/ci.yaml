@@ -32,12 +32,6 @@ jobs:
         extensions: mbstring, intl, pdo, pgsql
         tools: composer
 
-    # Étape 3 : Vérifier la connectivité à la base de données
-    - name: Test Database Connection
-      run: |
-        echo "Testing database connection..."
-        psql "host=${{ env.DB_HOST }} port=${{ env.DB_PORT }} user=${{ env.DB_USERNAME }} password=${{ env.DB_PASSWORD }} dbname=${{ env.DB_NAME }}" -c '\l'
-
     # Étape 4 : Configurer Xdebug
     - name: Configure Xdebug
       run: |
