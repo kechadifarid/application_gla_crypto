@@ -2,7 +2,7 @@
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
-require_once 'src/databaseConnection.php';
+require_once 'src/DatabaseConnection.php';
 
 use App\DatabaseConnection;
 

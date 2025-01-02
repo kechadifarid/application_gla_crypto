@@ -1,5 +1,5 @@
 <?php
-require_once('src/databaseConnection.php');
+require_once('src/DatabaseConnection.php');
 
 use App\DatabaseConnection;
 

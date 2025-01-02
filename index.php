@@ -1,6 +1,6 @@
 <?php 
-require_once ('src/databaseConnection.php');
-require_once ('src/setData.php');
+require_once ('src/DatabaseConnection.php');
+require_once ('src/CryptoManager.php');
 require_once ('login.php');
 require_once ('register.php');
 require_once ('logout.php');

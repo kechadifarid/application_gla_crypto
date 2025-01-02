@@ -2,9 +2,11 @@
 header('Content-Type: application/json');
 
 // Inclure la connexion à la base de données
-require_once 'src/databaseConnection.php';
+require_once 'src/DatabaseConnection.php';
 require_once 'src/setDataAllCrypto.php';
 use App\DatabaseConnection;
+use App\SetDataAllCrypto;
+
 
 // Récupérer les paramètres de la requête
 $start_date = $_GET['start_date'] ?? null;

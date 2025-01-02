@@ -1,6 +1,6 @@
 <?php
 namespace App;
-require_once ('databaseConnection.php');
+require_once ('DatabaseConnection.php');
 use App\DatabaseConnection;
 
 class CryptoManager {
