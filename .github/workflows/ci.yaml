@@ -21,8 +21,8 @@ jobs:
     - name: Set up PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '8.1'  # Ajusté pour correspondre à une version stable
-        extensions: mbstring, intl, pdo, pgsql
+        php-version: '8.1'  # Version stable recommandée
+        extensions: mbstring, intl, pdo, pgsql, xdebug
         tools: composer
 
     # Étape 3 : Vérifier la version de PHP
@@ -51,11 +51,17 @@ jobs:
     - name: Show PSR-4 Autoload Map
       run: cat vendor/composer/autoload_psr4.php
 
-    # Étape 7 : Exécuter les tests PHPUnit
+    # Étape 7 : Configurer Xdebug pour la couverture
+    - name: Configure Xdebug
+      run: |
+        echo "zend_extension=$(php-config --extension-dir)/xdebug.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+        echo "xdebug.mode=coverage" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+
+    # Étape 8 : Exécuter les tests PHPUnit avec couverture
     - name: Run PHPUnit Tests
       run: vendor/bin/phpunit --coverage-clover=coverage.xml
 
-    # Étape 8 : Installer et configurer Snyk
+    # Étape 9 : Installer et configurer Snyk
     - name: Install Snyk
       run: npm install -g snyk
     - name: Authenticate Snyk
@@ -63,10 +69,21 @@ jobs:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       run: snyk auth $SNYK_TOKEN
 
-    # Étape 9 : Lancer l'analyse des dépendances
+    # Étape 10 : Lancer l'analyse des dépendances avec Snyk
     - name: Snyk Dependency Test
       run: snyk test --all-projects
 
-    # Étape 10 : Surveiller les dépendances avec Snyk
+    # Étape 11 : Surveiller les dépendances avec Snyk
     - name: Monitor Dependencies with Snyk
       run: snyk monitor
+
+    # Étape 12 : Analyser avec SonarQube
+    - name: SonarQube Analysis
+      env:
+        SONAR_HOST_URL: http://<IP_SONARQUBE>:9000
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        sonar-scanner \
+          -Dsonar.projectKey=my-php-project \
+          -Dsonar.php.coverage.reportPaths=coverage.xml \
+          -Dsonar.sources=src
