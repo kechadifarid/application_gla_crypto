@@ -67,7 +67,7 @@ jobs:
 
     # 10. Lancer l'analyse des dépendances
     - name: Snyk Dependency Test
-      run: snyk test
+      run: snyk test --all-projects
 
     # 11. Lancer la surveillance des dépendances
     - name: Monitor Dependencies with Snyk
