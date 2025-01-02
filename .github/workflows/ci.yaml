@@ -32,17 +32,17 @@ jobs:
         echo "xdebug.mode=coverage" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini
         echo "xdebug.start_with_request=no" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini
 
-    # Étape 4 : Vérifier la version de PHP
+    # Étape 4 : Installer SonarScanner
+    - name: Install SonarScanner
+      run: |
+        wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+        unzip sonar-scanner-cli-5.0.1.3006-linux.zip
+        sudo mv sonar-scanner-5.0.1.3006-linux /opt/sonar-scanner
+        echo "export PATH=/opt/sonar-scanner/bin:$PATH" >> $GITHUB_ENV
+
+    # Étape 5 : Vérifier la version de PHP
     - name: Verify PHP Version
       run: php --version
-
-    # Étape 5 : Vérifier les fichiers du projet
-    - name: List Files in src and tests
-      run: |
-        echo "Files in src:"
-        ls -la src/
-        echo "Files in tests:"
-        ls -la tests/
 
     # Étape 6 : Nettoyer et réinstaller les dépendances
     - name: Remove Dependencies and Cache
@@ -58,7 +58,11 @@ jobs:
     - name: Run PHPUnit Tests
       run: vendor/bin/phpunit --coverage-clover=coverage.xml
 
-    # Étape 8 : Analyser avec SonarQube
+    # Étape 8 : Vérifier SonarScanner
+    - name: Verify SonarScanner
+      run: sonar-scanner --version
+
+    # Étape 9 : Analyser avec SonarQube
     - name: SonarQube Analysis
       env:
         SONAR_HOST_URL: http://<IP_SONARQUBE>:9000
