@@ -54,8 +54,8 @@ jobs:
     # Étape 7 : Configurer Xdebug pour la couverture
     - name: Configure Xdebug
       run: |
-        echo "zend_extension=$(php-config --extension-dir)/xdebug.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
-        echo "xdebug.mode=coverage" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+        echo "xdebug.mode=coverage" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+        echo "xdebug.start_with_request=no" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
     # Étape 8 : Exécuter les tests PHPUnit avec couverture
     - name: Run PHPUnit Tests
