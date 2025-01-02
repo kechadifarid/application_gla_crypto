@@ -13,6 +13,7 @@ $conn = $db->connect();
 $query = "SELECT alerts.*, users.email FROM alerts 
           JOIN users ON alerts.user_id = users.id 
           WHERE email_sent = FALSE";
+          
 $stmt = $conn->prepare($query);
 $stmt->execute();
 $alerts = $stmt->fetchAll(PDO::FETCH_ASSOC);
