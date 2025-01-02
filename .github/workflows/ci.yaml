@@ -55,3 +55,20 @@ jobs:
     - name: Run PHPUnit Tests
       run: vendor/bin/phpunit --filter DatabaseConnectionTest
 
+    # 8. Installer Snyk
+    - name: Install Snyk
+      run: npm install -g snyk
+
+    # 9. Authentifier Snyk
+    - name: Authenticate Snyk
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      run: snyk auth $SNYK_TOKEN
+
+    # 10. Lancer l'analyse des dépendances
+    - name: Snyk Dependency Test
+      run: snyk test
+
+    # 11. Lancer la surveillance des dépendances
+    - name: Monitor Dependencies with Snyk
+      run: snyk monitor
