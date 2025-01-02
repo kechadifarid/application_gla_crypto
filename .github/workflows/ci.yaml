@@ -25,17 +25,17 @@ jobs:
         extensions: mbstring, intl, pdo, pgsql
         tools: composer
 
-    # Étape 3 : Installer Xdebug
     - name: Install Xdebug
       run: |
-        sudo pecl install xdebug
-        echo "zend_extension=$(php-config --extension-dir)/xdebug.so" | sudo tee /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+        sudo apt-get update
+        sudo apt-get install -y php-xdebug
 
-    # Étape 4 : Configurer Xdebug
     - name: Configure Xdebug
       run: |
-        echo "xdebug.mode=coverage" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-        echo "xdebug.start_with_request=no" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+        echo "zend_extension=$(php-config --extension-dir)/xdebug.so" | sudo tee /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+        echo "xdebug.mode=coverage" | sudo tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+        echo "xdebug.start_with_request=no" | sudo tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+
 
     # Étape 5 : Vérifier la version de PHP
     - name: Verify PHP Version
