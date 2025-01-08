@@ -1,0 +1,1 @@
+{"version":1,"defects":{"Test\\SetDataTest::testClearCryptoTable":4},"times":{"Test\\DatabaseConnectionTest::testConnection":0.527,"Test\\SetDataTest::testFetchCryptoDataFromAPI":0.319,"Test\\SetDataTest::testCreateCryptoTable":0.464,"Test\\SetDataTest::testClearCryptoTable":0.356}}

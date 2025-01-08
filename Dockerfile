@@ -1,28 +1,32 @@
-# Étape 1 : Utiliser une image PHP avec Apache
+# Utiliser une image PHP avec Apache
 FROM php:8.1-apache
 
-# Étape 2 : Installer les dépendances nécessaires
-RUN apt-get update && apt-get install -y \
-    libzip-dev \
+# Installer les extensions PHP et les outils nécessaires
+RUN apt-get update && apt-get install -y --no-install-recommends \
     unzip \
-    && docker-php-ext-install zip \
-    && pecl install xdebug \
-    && docker-php-ext-enable xdebug
+    libpq-dev \
+    curl \
+    git \
+    && docker-php-ext-install pdo_pgsql \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Étape 3 : Configurer Xdebug
-RUN echo "zend_extension=xdebug.so" >> /usr/local/etc/php/php.ini
-RUN echo "xdebug.mode=coverage" >> /usr/local/etc/php/php.ini
-RUN echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/php.ini
-RUN echo "xdebug.discover_client_host=true" >> /usr/local/etc/php/php.ini
+# Installer Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Étape 4 : Installer Composer (si nécessaire)
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Étape 5 : Copier les fichiers de l'application dans le conteneur
+# Copier le code source dans l'image
 COPY . /var/www/html/
 
-# Étape 6 : Définir les permissions
-RUN chown -R www-data:www-data /var/www/html
+# Configurer les permissions
+RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html
 
-# Étape 7 : Exposer le port
+# Réinitialiser les modifications dans les dépendances Git et installer avec Composer
+RUN rm -rf /var/www/html/vendor \
+    && COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader --ignore-platform-reqs \
+    || (git -C /var/www/html/vendor/theseer/tokenizer reset --hard && git -C /var/www/html/vendor/theseer/tokenizer clean -fd && composer install --no-dev --optimize-autoloader --ignore-platform-reqs)
+
+# Exposer le port utilisé par Apache
 EXPOSE 80
+
+# Démarrer le serveur Apache
+CMD ["apache2-foreground"]
