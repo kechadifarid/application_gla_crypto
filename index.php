@@ -1,6 +1,5 @@
 <?php 
 require_once ('src/DatabaseConnection.php');
-require_once ('src/CryptoManager.php');
 require_once ('login.php');
 require_once ('register.php');
 require_once ('logout.php');
@@ -13,27 +12,21 @@ use App\CryptoManager;
 $db = new DatabaseConnection();
 $conn = $db->connect();
 
-$setData = new CryptoManager();
+// Récupérer les dernières données pour chaque cryptomonnaie
+$query = "
+SELECT DISTINCT ON (symbol) name, symbol, price_usd, last_updated
+FROM cryptocurrencies
+ORDER BY symbol, last_updated DESC;
+";
 
-
-// 1. Vider la table 'cryptocurrencies' avant d'insérer les nouvelles données
-$setData->clearCryptoTable();
-
-// 2. Récupérer les données depuis l'API CoinCap
-$api_url = "https://api.coincap.io/v2/assets";  // URL de l'API CoinCap
-$cryptoData = $setData->fetchCryptoDataFromAPI($api_url);
-
-// 3. Insérer ou mettre à jour les données dans la base de données
-$setData->insertOrUpdateCryptos($cryptoData);
+$stmt = $conn->prepare($query);
+$stmt->execute();
+$cryptos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Gestion des filtres de date
 $startDate = $_GET['start_date'] ?? null;
 $endDate = $_GET['end_date'] ?? null;
 
-$query = "SELECT * FROM cryptocurrencies LIMIT 8";
-$stmt = $conn->prepare($query);
-$stmt->execute();
-$cryptos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -328,16 +321,22 @@ tr:hover {
    
     <!-- Formulaire de sélection des dates -->
     <div id="dateFormContainer" style="display: none;">
-    <h1>Tableau des Cryptomonnaies</h1>
-        <form id="dateForm" method="get" action="">
-            <label for="start_date">Date de début :</label>
-            <input type="date" id="start_date" name="start_date"?>
+    
+    <form id="dateForm" method="get" action="">
+    <label for="start_date">Date de début :</label>
+    <input type="date" id="start_date" name="start_date" required>
 
-            <label for="end_date">Date de fin :</label>
-            <input type="date" id="end_date" name="end_date"?>
+    <label for="end_date">Date de fin :</label>
+    <input type="date" id="end_date" name="end_date" required>
 
-            <button type="submit" name="filtrer">Filtrer</button>
-        </form>
+    <label for="chart_type">Type de graphique :</label>
+    <select id="chart_type" name="chart_type" required>
+        <option value="line">Courbe de prix</option>
+        <option value="heatmap">Carte thermique</option>
+    </select>
+
+    <button type="submit" name="filtrer">Filtrer</button>
+</form>
     </div>
 
     <?php
@@ -346,23 +345,25 @@ tr:hover {
     ?>
     <!-- Tableau des cryptomonnaies -->
     <table id="cryptoTable">
-        <caption>Liste des Cryptomonnaies</caption>
+        <caption>Dernières données des Cryptomonnaies</caption>
         <thead>
             <tr>
                 <th>Nom</th>
-                <th>Symbol</th>
+                <th>Symbole</th>
                 <th>Prix (USD)</th>
+                <th>Dernière mise à jour</th>
                 <th>+</th>
             </tr>
         </thead>
         <tbody>
-            <?php
+                <?php
             foreach ($cryptos as $crypto) {
                 echo "<tr>";
                 echo "<td>" . htmlspecialchars($crypto['name']) . "</td>";
                 echo "<td>" . htmlspecialchars($crypto['symbol']) . "</td>";
                 echo "<td>" . htmlspecialchars($crypto['price_usd']) . "</td>";
-                echo "<td><a href='#' class='showGraph' data-crypto='" . htmlspecialchars($crypto['name']) . "'>Plus d'informations</a></td>";
+                echo "<td>" . htmlspecialchars($crypto['last_updated']) . "</td>";
+                echo "<td><a href='#' class='showGraph' data-crypto='" . htmlspecialchars($crypto['symbol']) . "'>Plus d'informations</a></td>";
                 echo "</tr>";
             }
             ?>
@@ -392,10 +393,16 @@ tr:hover {
         <canvas id="cryptoChart"></canvas>
    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/heatmap.js/2.0.5/heatmap.min.js"></script>
+
     <script>
        
        document.addEventListener('DOMContentLoaded', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('success')) {
+        alert("L'alerte a été enregistrée avec succès !");
+    }
 
         document.getElementById('alertes').addEventListener('click', function () {
         
@@ -428,13 +435,14 @@ tr:hover {
             document.getElementById('dateFormContainer').style.display = 'block';
         });
     });
-
+    let chartInstance = null;
     // Gestion de la soumission du formulaire de dates
     document.getElementById('dateForm').addEventListener('submit', function (event) {
-        event.preventDefault();  // Empêche la soumission normale du formulaire
+        event.preventDefault();
 
         var startDate = document.getElementById('start_date').value;
-        var endDate = document.getElementById('end_date').value;
+    var endDate = document.getElementById('end_date').value;
+    var chartType = document.getElementById('chart_type').value;
 
         // Vérifier que les dates sont remplies
         if (!startDate || !endDate) {
@@ -450,51 +458,82 @@ tr:hover {
 
         console.log("Nom de la crypto :", selectedCryptoName);
         console.log("Dates sélectionnées :", startDate, endDate);
+        
 
         // Effectuer la requête fetch avec les paramètres start_date, end_date et crypto
         fetch(`fetchData.php?start_date=${startDate}&end_date=${endDate}&crypto=${selectedCryptoName}`)
-            .then(response => response.json())
-            .then(data => {
-                console.log("Données reçues :", data);
-                if (data.error) {
-                    alert(data.error);
-                    return;
-                }
+        .then(response => response.json())
+        .then(data => {
+    if (data.error) {
+        alert(data.error);
+        return;
+    }
 
-                // Créer le graphique avec les données récupérées
-                var ctx = document.getElementById('cryptoChart').getContext('2d');
-                var chart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: data.dates,
-                        datasets: [{
-                            label: 'Prix USD',
-                            data: data.prices,
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            fill: false
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Date'
-                                }
-                            },
-                            y: {
-                                title: {
-                                    display: true,
-                                    text: 'Prix (USD)'
-                                }
-                            }
-                        }
-                    }
-                });
-            })
-            .catch(error => console.error("Erreur lors de la récupération des données : ", error));
+    // Vérifiez si un graphique existe et détruisez-le
+    if (chartInstance) {
+        chartInstance.destroy(); 
+    }
+
+    var ctx = document.getElementById('cryptoChart').getContext('2d');
+
+    if (chartType === 'line') {
+        // Create a new line chart
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.dates,
+                datasets: [{
+                    label: 'Prix USD',
+                    data: data.prices,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { title: { display: true, text: 'Date' } },
+                    y: { title: { display: true, text: 'Prix (USD)' } }
+                }
+            }
+        });
+    } else  if (chartType === 'heatmap') {
+        const heatmapContainer = document.createElement('div');
+        heatmapContainer.style.width = '100%';
+        heatmapContainer.style.height = '400px';
+        heatmapContainer.style.position = 'relative';
+        document.getElementById('graphContainer').appendChild(heatmapContainer);
+
+        // Crée l'instance heatmap
+        const heatmap = h337.create({
+            container: heatmapContainer,
+            maxOpacity: 0.6,
+            radius: 50,
+            blur: 0.9,
+        });
+
+        // Données de la heatmap
+        heatmap.setData({
+            max: Math.max(...data.heatmap.map(d => d.value)),
+            data: data.heatmap,
+        });
+    }
+})
+        .catch(error => console.error('Erreur lors de la récupération des données : ', error));
+});
+
+function renderHeatmap(heatmapData) {
+    const heatmap = h337.create({
+        container: document.querySelector('#graphContainer'),
+        radius: 50,
+        maxOpacity: 0.6
     });
+
+    heatmap.setData({
+        max: Math.max(...heatmapData.map(d => d.value)),
+        data: heatmapData
+    });
+}
 
     document.getElementById('showSignupForm').addEventListener('click', function() {
         // Masquer le formulaire de connexion

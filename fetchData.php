@@ -3,17 +3,14 @@ header('Content-Type: application/json');
 
 // Inclure la connexion à la base de données
 require_once 'src/DatabaseConnection.php';
-require_once 'src/setDataAllCrypto.php';
 use App\DatabaseConnection;
-use App\SetDataAllCrypto;
-
 
 // Récupérer les paramètres de la requête
 $start_date = $_GET['start_date'] ?? null;
 $end_date = $_GET['end_date'] ?? null;
-$crypto_name = $_GET['crypto'] ?? null;
+$crypto_symbol = $_GET['crypto'] ?? null;
 
-if (!$start_date || !$end_date || !$crypto_name) {
+if (!$start_date || !$end_date || !$crypto_symbol) {
     echo json_encode(['error' => 'Paramètres manquants']);
     exit;
 }
@@ -23,17 +20,24 @@ try {
     $db = new DatabaseConnection();
     $conn = $db->connect();
 
-    $setDataAll = new SetDataAllCrypto();
-    $setDataAll->getDataCrypto($start_date, $end_date, $crypto_name);
-
-    // Nom de la table de la cryptomonnaie
-    $tableName = 'info' . preg_replace('/[^A-Za-z0-9_]/', '_', $crypto_name);
-
     // Requête SQL pour récupérer les données entre les dates spécifiées
-    $query = "SELECT date, price_usd FROM $tableName WHERE date BETWEEN :start_date AND :end_date ORDER BY date ASC";
+    $query = "
+        SELECT last_updated AS date, price_usd 
+        FROM cryptocurrencies 
+        WHERE symbol = :symbol 
+        AND last_updated BETWEEN :start_date AND :end_date 
+        ORDER BY last_updated ASC
+    ";
     $stmt = $conn->prepare($query);
-    $stmt->bindParam(':start_date', $start_date);
-    $stmt->bindParam(':end_date', $end_date);
+
+    // Formater les dates au format attendu par la base de données
+    $formatted_start_date = date('Y-m-d 00:00:00', strtotime($start_date));
+    $formatted_end_date = date('Y-m-d 23:59:59', strtotime($end_date));
+    
+
+    $stmt->bindParam(':symbol', $crypto_symbol);
+    $stmt->bindParam(':start_date', $formatted_start_date);
+    $stmt->bindParam(':end_date', $formatted_end_date);
     $stmt->execute();
 
     // Récupérer les données
@@ -42,22 +46,27 @@ try {
     if ($data) {
         $dates = [];
         $prices = [];
+        $heatmap = [];
 
         foreach ($data as $entry) {
             $dates[] = $entry['date'];
             $prices[] = $entry['price_usd'];
+            $heatmap[] = [
+                'x' => strtotime($entry['date']),
+                'y' => rand(0, 10), // Exemple de rangée arbitraire pour la heatmap
+                'value' => $entry['price_usd']
+            ];
         }
 
         echo json_encode([
             'dates' => $dates,
-            'prices' => $prices
+            'prices' => $prices,
+            'heatmap' => $heatmap
         ]);
     } else {
         echo json_encode(['error' => 'Aucune donnée trouvée']);
     }
-
 } catch (Exception $e) {
-    // En cas d'erreur, renvoyer un message d'erreur
-    echo json_encode(['error' => 'Erreur lors de la récupération des données : ' . $e->getMessage()]);
+    echo json_encode(['error' => 'Erreur : ' . $e->getMessage()]);
 }
 ?>
