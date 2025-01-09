@@ -17,13 +17,7 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    # Étape 2 : Mettre à jour les sous-modules Git
-    - name: Update Git Submodules
-      run: |
-        git submodule init
-        git submodule update
-
-    # Étape 3 : Configurer PHP
+    # Étape 2 : Configurer PHP
     - name: Set up PHP
       uses: shivammathur/setup-php@v2
       with:
@@ -31,7 +25,7 @@ jobs:
         extensions: mbstring, intl, pdo, pgsql, dom, curl
         tools: composer
 
-    # Étape 4 : Nettoyer et réinstaller les dépendances
+    # Étape 3 : Nettoyer et réinstaller les dépendances
     - name: Remove Dependencies and Cache
       run: |
         rm -rf vendor composer.lock
@@ -39,12 +33,12 @@ jobs:
     - name: Install Dependencies
       run: composer install --no-progress --prefer-dist
 
-    # Étape 5 : Exécuter les tests PHPUnit
+    # Étape 4 : Exécuter les tests PHPUnit
     - name: Run PHPUnit Tests
       run: |
         vendor/bin/phpunit --coverage-clover=coverage.xml || echo "PHPUnit tests failed. Check logs for details."
 
-    # Étape 6 : Installer et configurer Snyk
+    # Étape 5 : Installer et configurer Snyk
     - name: Install Snyk
       run: npm install -g snyk
     - name: Authenticate Snyk
@@ -52,10 +46,10 @@ jobs:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       run: snyk auth $SNYK_TOKEN
 
-    # Étape 7 : Lancer l'analyse des dépendances avec Snyk
+    # Étape 6 : Lancer l'analyse des dépendances avec Snyk
     - name: Snyk Dependency Test
       run: snyk test --all-projects
 
-    # Étape 8 : Surveiller les dépendances avec Snyk
+    # Étape 7 : Surveiller les dépendances avec Snyk
     - name: Monitor Dependencies with Snyk
       run: snyk monitor
