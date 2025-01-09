@@ -161,10 +161,5 @@ class SetDataTest extends TestCase {
     }
     
 
-    protected function tearDown(): void
-    {
-        // Nettoyez la base de données après le test
-        $conn = $this->db->connect();
-        $conn->exec("DROP TABLE IF EXISTS cryptocurrencies");
-    }
+
 }

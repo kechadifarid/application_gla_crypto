@@ -32,17 +32,17 @@ class CryptoManager {
     // Méthode pour créer la table si elle n'existe pas
     public function createCryptoTable() {
         $sql = "
-CREATE TABLE IF NOT EXISTS cryptocurrencies (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100),
-    symbol VARCHAR(10) UNIQUE, -- Ajout de la contrainte UNIQUE
-    price_usd NUMERIC,
-    rank INT,
-    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-";
-
-
+    CREATE TABLE IF NOT EXISTS cryptocurrencies (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(100),
+        symbol VARCHAR(10), 
+        price_usd NUMERIC,
+        rank INT,
+        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (symbol, last_updated)
+    );
+    ";
+    
         $this->conn->exec($sql);
         return "La table 'cryptocurrencies' a été créée (ou existe déjà).<br>";
     }
@@ -52,14 +52,14 @@ CREATE TABLE IF NOT EXISTS cryptocurrencies (
         $stmt = $this->conn->prepare("
             INSERT INTO cryptocurrencies (name, symbol, price_usd, rank, last_updated) 
             VALUES (:name, :symbol, :price_usd, :rank, :last_updated)
-            ON CONFLICT (symbol) DO UPDATE 
+            ON CONFLICT (symbol, last_updated) DO UPDATE 
             SET price_usd = EXCLUDED.price_usd, 
                 rank = EXCLUDED.rank, 
                 last_updated = EXCLUDED.last_updated
         ");
-
+    
         $currentTime = date('Y-m-d H:i:s'); // Récupérer le moment actuel
-
+    
         foreach ($cryptos as $crypto) {
             $stmt->bindParam(':name', $crypto['name']);
             $stmt->bindParam(':symbol', $crypto['symbol']);
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS cryptocurrencies (
             $stmt->bindParam(':last_updated', $currentTime);
             $stmt->execute();
         }
-    }
+    } 
     protected function getFileContents($url) {
         return file_get_contents($url);
     }

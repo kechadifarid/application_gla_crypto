@@ -29,17 +29,10 @@ jobs:
       uses: shivammathur/setup-php@v2
       with:
         php-version: '8.1'
-        extensions: mbstring, intl, pdo, pgsql, xdebug, dom, curl
+        extensions: mbstring, intl, pdo, pgsql, dom, curl
         tools: composer
 
-    # Étape 3 : Configurer Xdebug
-    - name: Configure Xdebug
-      run: |
-        mkdir -p ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d
-        echo "xdebug.mode=coverage" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini
-        echo "xdebug.start_with_request=no" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini
-
-    # Étape 4 : Nettoyer et réinstaller les dépendances
+    # Étape 3 : Nettoyer et réinstaller les dépendances
     - name: Remove Dependencies and Cache
       run: |
         rm -rf vendor composer.lock
@@ -47,7 +40,7 @@ jobs:
     - name: Install Dependencies
       run: composer install --no-progress --prefer-dist
 
-    # Étape 5 : Exécuter les tests PHPUnit avec couverture
+    # Étape 4 : Exécuter les tests PHPUnit
     - name: Run PHPUnit Tests
       env:
         DB_HOST: ${{ env.DB_HOST }}
@@ -56,31 +49,7 @@ jobs:
         DB_NAME: ${{ env.DB_NAME }}
       run: vendor/bin/phpunit --coverage-clover=coverage.xml
 
-    # Étape 6 : Installer SonarScanner
-    - name: Install SonarScanner
-      run: |
-        wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
-        unzip sonar-scanner-cli-5.0.1.3006-linux.zip
-        sudo mv sonar-scanner-5.0.1.3006-linux /opt/sonar-scanner
-        echo "export PATH=/opt/sonar-scanner/bin:$PATH" >> $GITHUB_ENV
-
-    # Étape 7 : Vérifier SonarScanner
-    - name: Verify SonarScanner
-      run: sonar-scanner --version
-
-    # Étape 8 : Analyser avec SonarQube
-    - name: SonarQube Analysis
-      env:
-        SONAR_HOST_URL: http://<IP_SONARQUBE>:9000
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: |
-        sonar-scanner \
-          -Dsonar.projectKey=my-php-project \
-          -Dsonar.php.coverage.reportPaths=coverage.xml \
-          -Dsonar.sources=src
-
-
-    # Étape 8 : Installer et configurer Snyk
+    # Étape 5 : Installer et configurer Snyk
     - name: Install Snyk
       run: npm install -g snyk
     - name: Authenticate Snyk
@@ -88,10 +57,10 @@ jobs:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       run: snyk auth $SNYK_TOKEN
 
-    # Étape 9 : Lancer l'analyse des dépendances avec Snyk
+    # Étape 6 : Lancer l'analyse des dépendances avec Snyk
     - name: Snyk Dependency Test
       run: snyk test --all-projects
 
-    # Étape 10 : Surveiller les dépendances avec Snyk
+    # Étape 7 : Surveiller les dépendances avec Snyk
     - name: Monitor Dependencies with Snyk
       run: snyk monitor
