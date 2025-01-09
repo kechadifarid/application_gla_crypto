@@ -25,6 +25,9 @@ RUN rm -rf /var/www/html/vendor \
     && COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader --ignore-platform-reqs \
     || (git -C /var/www/html/vendor/theseer/tokenizer reset --hard && git -C /var/www/html/vendor/theseer/tokenizer clean -fd && composer install --no-dev --optimize-autoloader --ignore-platform-reqs)
 
+# Activer l'extension xdebug
+RUN pecl install xdebug && docker-php-ext-enable xdebug
+
 # Exposer le port utilisé par Apache
 EXPOSE 80
 

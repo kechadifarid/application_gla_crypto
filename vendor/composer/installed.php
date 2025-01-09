@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'kecha/app-web',
-        'pretty_version' => '1.0.0+no-version-set',
-        'version' => '1.0.0.0',
-        'reference' => null,
+        'pretty_version' => 'dev-main',
+        'version' => 'dev-main',
+        'reference' => 'fdb195071ffb70c7eed8b8ef59ea2e641a5d1437',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -20,9 +20,9 @@
             'dev_requirement' => true,
         ),
         'kecha/app-web' => array(
-            'pretty_version' => '1.0.0+no-version-set',
-            'version' => '1.0.0.0',
-            'reference' => null,
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
+            'reference' => 'fdb195071ffb70c7eed8b8ef59ea2e641a5d1437',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

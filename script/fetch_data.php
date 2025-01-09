@@ -1,6 +1,5 @@
-<?php
-require_once 'CryptoManager.php';
-require_once 'DatabaseConnection.php';
+cd ..<?php
+require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\CryptoManager;
 use App\DatabaseConnection;

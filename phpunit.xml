@@ -1,10 +1,16 @@
-<phpunit backupGlobals="false" backupStaticAttributes="false">
-    <logging>
-        <clover outputFile="coverage.xml"/>
-    </logging>
-    <coverage>
+<phpunit bootstrap="vendor/autoload.php" colors="true">
+    <testsuites>
+        <testsuite name="Application Tests">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <coverage processUncoveredFiles="true">
         <include>
-            <directory suffix=".php">./src</directory> <!-- Répertoire contenant ton code -->
+            <directory suffix=".php">src</directory>
         </include>
+        <exclude>
+            <directory suffix=".php">vendor</directory>
+        </exclude>
     </coverage>
 </phpunit>

@@ -22,7 +22,7 @@ class DatabaseConnection {
                 );
                 $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             } catch (PDOException $e) {
-                die("Erreur de connexion : " . $e->getMessage());
+                throw new PDOException("Erreur de connexion : " . $e->getMessage(), $e->getCode(), $e);
             }
         }
         return $this->conn;
@@ -32,3 +32,4 @@ class DatabaseConnection {
         $this->conn = null;
     }
 }
+
