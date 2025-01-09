@@ -35,7 +35,7 @@ jobs:
 
     # Étape 4 : Exécuter les tests PHPUnit
     - name: Run PHPUnit Tests
-      run: vendor/bin/phpunit --coverage-clover=coverage.xml
+      run: vendor/bin/phpunit
 
     # Étape 5 : Installer et configurer Snyk
     - name: Install Snyk
